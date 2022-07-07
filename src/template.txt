@@ -1,0 +1,515 @@
+///////////////////////////////////SETUPIMPORTS/////////////////////////////
+
+import './style.css'
+import * as THREE from 'three'
+import { gsap } from 'gsap'
+// npm install --save gsap@3.5.1 for better control of animations Green Sock Library
+import { OrbitControls } from 'three/examples/jsm/controls/Orbitcontrols.js'
+// import { THREEx } from 'threex.domevents/threex.domevents.js'
+// import * as THREEx from 'threex'
+import * as dat from 'dat.gui'
+import { Camera, TorusBufferGeometry } from 'three'
+import { Material } from 'cannon'
+
+
+
+
+
+// /////////////////////////////SETUPCANVASANDSCENE/////////////////////////
+
+const canvas = document.querySelector('canvas.webgl')
+const scene = new THREE.Scene()
+const groupScene = new THREE.Group()
+scene.add(groupScene)
+
+// ////////////////////////////SETUPWINDOW////////////////////////////////////
+
+const sizes = {
+    width: window.innerWidth,
+    height: window. innerHeight
+}
+
+window.addEventListener('resize', () =>
+{
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
+
+    camera.aspect =  sizes.width / sizes.height
+    camera.updateProjectionMatrix()
+
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+})
+
+
+// //////////////////////////////SETUPLIGHTS////////////////////////////////////////////
+
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+scene.add(ambientLight)
+
+
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
+directionalLight.position.x = 2
+directionalLight.position.y = 3
+directionalLight.position.z = 4
+scene.add(directionalLight)
+
+// ////////////////////////////SETUPRENDERER//////////////////////////////////////////
+
+const renderer = new THREE.WebGLRenderer({
+    canvas: document.querySelector('canvas.webgl'),
+    antialias: true
+})
+
+renderer.setSize(sizes.width, sizes.height)
+
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+
+
+///////////////////////////////////SETUPLOADINGMANAGEROVERLAY////////////////////////////////////////
+let sceneReady = false
+
+
+
+const loadingManager = new THREE.LoadingManager(
+    // Loaded
+    () =>
+    {
+        gsap.to(overlayMaterial.uniforms.uAlpha, { duration: 5, value: 0 })
+    },
+
+    // Progress
+    () =>
+    {
+
+    },
+
+    // window.setTimeout(() =>
+    // {
+    // }, 3000)
+)
+
+const overlayGeometry = new THREE.PlaneBufferGeometry(2, 2, 1, 1)
+const overlayMaterial = new THREE.ShaderMaterial({
+    transparent: true,
+    uniforms:
+    {
+        uAlpha: { value: 1 }
+    },
+    vertexShader: `
+        void main()
+        {
+            gl_Position = vec4(position, 1.0);
+        }
+    `,
+        fragmentShader: `
+        uniform float uAlpha;
+        void main()
+        {
+            gl_FragColor = vec4(0.0, 0., 0.0, uAlpha);
+        }
+    `
+})
+const overlay = new THREE.Mesh(overlayGeometry, overlayMaterial)
+scene.add(overlay)
+
+
+
+
+/////////////////////////SETUPLOADINGMANAGERTEXTURES////////////////////////////
+
+const textureLoader = new THREE.TextureLoader(loadingManager)
+
+const matcapTexture = textureLoader.load('/textures/matcaps/9.png')
+
+/////////////////////////////////SETUPCAMERA////////////////////////////////////
+
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
+camera.lookAt(0, 0, 0)
+camera.position.set(0, 20, 20)
+scene.add(camera)
+
+
+//
+
+
+
+///////////////////////////ADDGROUP1/////////////////////////////////
+
+const group1 = new THREE.Group()
+groupScene.add(group1)
+
+/////////////////////////////ADDSIGN1/////////////////////////////////////
+
+
+
+const sign1Geo = new THREE.BoxBufferGeometry(8, 2, 0.2)
+const sign1Mat = new THREE.MeshStandardMaterial({
+    color: 0xff0000
+})
+const sign1 = new THREE.Mesh(sign1Geo, sign1Mat)
+sign1.position.y = 5
+group1.add(sign1)
+
+/////////////////////////////ADDINV1/////////////////////////////////////
+
+const inv1Geo = new THREE.BoxBufferGeometry(8, 6, 6)
+const inv1Mat = new THREE.MeshStandardMaterial({
+    color: 0xff0000,
+    wireframe: true,
+    // transparent: true,
+    // opacity: 0
+})
+const inv1 = new THREE.Mesh(inv1Geo, inv1Mat)
+inv1.position.y = 3
+group1.add(inv1)
+
+////////////////////////////ADDINFO1/////////////////////////////
+
+const info1Geo = new THREE.BoxBufferGeometry(8, 2, 0.2)
+const info1Mat = new THREE.MeshStandardMaterial({
+    color: 0xff00ff
+})
+const info1 = new THREE.Mesh(info1Geo, info1Mat)
+info1.position.y = 5
+group1.add(info1)
+
+//////////////////////////ADDBUILDING1//////////////////////
+
+const building1Geo = new THREE.BoxBufferGeometry(8, 3, 6)
+const building1Mat = new THREE.MeshStandardMaterial({
+    color: 0xffa500
+})
+const building1 = new THREE.Mesh(building1Geo, building1Mat)
+building1.position.y = 1.5
+group1.add(building1)
+
+
+/////////////////////////////ADDBACK1///////////////////////////
+
+const back1Geo = new THREE.CircleBufferGeometry(0.05, 32)
+const back1Mat = new THREE.MeshStandardMaterial({
+    color: 0x0000ff
+})
+const back1 = new THREE.Mesh(back1Geo, back1Mat)
+camera.add(back1)
+back1.position.z = -0.5
+back1.position.y = -0.32
+
+
+/////////////////////////////ADDBACK1INV///////////////////////////
+
+const back1InvGeo = new THREE.CircleBufferGeometry(0.05, 32)
+const back1InvMat = new THREE.MeshStandardMaterial({
+    color: 0xff0000,
+    wireframe: true
+})
+const back1Inv = new THREE.Mesh(back1InvGeo, back1InvMat)
+camera.add(back1Inv)
+back1Inv.position.z = -0.5
+back1Inv.position.y = -0.25
+
+
+/////////////////////SCENESTART////////////////////////
+
+sign1.scale.x = 0
+sign1.scale.y = 0
+sign1.scale.z = 0
+
+info1.scale.x = 0
+info1.scale.y = 0
+info1.scale.z = 0
+
+back1.scale.x = 0
+back1.scale.y = 0
+back1.scale.z = 0
+
+back1Inv.scale.x = 0
+back1Inv.scale.y = 0
+back1Inv.scale.z = 0
+
+let oneReady = false
+
+/////////////////////SCENEOPENING/////////////////////////////
+
+window.setTimeout(() =>
+{
+    gsap.to(sign1.scale,{ duration: 2, delay: 0, x: 1 })
+    gsap.to(sign1.scale,{ duration: 2, delay: 0, y: 1 })
+    gsap.to(sign1.scale,{ duration: 2, delay: 0, z: 1 })
+},
+3000)
+
+window.setTimeout(() =>
+{
+    sceneReady = true
+},
+5000)
+
+
+////////////////////////////////CONFIGFOG/////////////////////////////////////////
+
+// To set renderer to match color of fog
+renderer.setClearColor('#84E4F7')
+const fog = new THREE.Fog('#84E4F7', 18, 70)
+
+scene.fog = fog
+
+
+//////////////////////////////CONFIGOPENMAPSIGNSAFTERBACKTOMAPCLICK////////////////////////////
+
+function openMapSigns()
+{
+    gsap.to(sign1.scale, { duration: 0.5, delay: 1.5, x: 1 })
+    gsap.to(sign1.scale, { duration: 0.5, delay: 1.5, y: 1 })
+    gsap.to(sign1.scale, { duration: 0.5, delay: 1.5, z: 1 }) 
+
+    gsap.to(inv1.scale, { duration: 0.5, delay: 1.5, x: 1 })
+    gsap.to(inv1.scale, { duration: 0.5, delay: 1.5, y: 1 })
+    gsap.to(inv1.scale, { duration: 0.5, delay: 1.5, z: 1 })
+}
+
+//////////////////////////////CONFIGCLOSEMAPSIGNSAFTERINVCLICK////////////////////////////
+
+function closeMapSigns()
+{
+    gsap.to(sign1.scale, { duration: 0.5, delay: 0, x: 0 })
+    gsap.to(sign1.scale, { duration: 0.5, delay: 0, y: 0 })
+    gsap.to(sign1.scale, { duration: 0.5, delay: 0, z: 0 }) 
+
+    gsap.to(info1.scale, { duration: 0.5, delay: 0, x: 0 })
+    gsap.to(info1.scale, { duration: 0.5, delay: 0, y: 0 })
+    gsap.to(info1.scale, { duration: 0.5, delay: 0, z: 0 }) 
+    
+    gsap.to(inv1.scale, { duration: 0.5, delay: 0, x: 0 })
+    gsap.to(inv1.scale, { duration: 0.5, delay: 0, y: 0 })
+    gsap.to(inv1.scale, { duration: 0.5, delay: 0, z: 0 }) 
+}
+
+/////////////////////////////CONFIGHOVER///////////////////////////////
+const raycaster = new THREE.Raycaster()
+const mouse = new THREE.Vector2()
+mouse.x = sizes.width
+mouse.y = sizes.height
+
+window.addEventListener('mousemove', (event) =>
+
+{
+    mouse.x = event.clientX / sizes.width * 2 - 1
+    mouse.y = - (event.clientY / sizes.height) * 2 + 1
+})
+
+let currentIntersect = null
+
+/////////////////////////////CONFIGCLICK///////////////
+const onClick = event =>
+{
+    event.preventDefault();
+
+    const cursor = new THREE.Vector2
+    (
+        (event.clientX / window.innerWidth) * 2 - 1,
+        -(event.clientY / window.innerHeight) * 2 + 1
+    )
+
+    raycaster.setFromCamera(cursor, camera)
+
+
+///////////////////////////CONFIGINV1CLICKED///////////////////////
+    if(sceneReady)
+    {
+        const [inv1Clicked] = raycaster.intersectObject(inv1);
+        if (inv1Clicked)
+        {
+            console.log("inv1 clicked")
+            sceneReady = false
+            oneReady = true
+
+
+            // Move Camera
+            gsap.to(controls.target, { duration: 2, delay: 0, x: 0 })
+            gsap.to(controls.target, { duration: 2, delay: 0, y: 1 })
+            gsap.to(controls.target, { duration: 2, delay: 0, z: -5 })
+            
+            gsap.to(camera.position, { duration: 2, delay: 0, x: 0 })
+            gsap.to(camera.position, { duration: 2, delay: 0, y: 1 })
+            gsap.to(camera.position, { duration: 2, delay: 0, z: 7 }) 
+
+            // Close signs
+            closeMapSigns()
+
+            // Open backSigns
+            gsap.to(back1.scale, { duration: 0.5, delay: 1.5, x: 1 })
+            gsap.to(back1.scale, { duration: 0.5, delay: 1.5, y: 1 })
+            gsap.to(back1.scale, { duration: 0.5, delay: 1.5, z: 1 }) 
+
+            gsap.to(back1Inv.scale, { duration: 0.5, delay: 1.5, x: 1 })
+            gsap.to(back1Inv.scale, { duration: 0.5, delay: 1.5, y: 1 })
+            gsap.to(back1Inv.scale, { duration: 0.5, delay: 1.5, z: 1 }) 
+
+        }
+    }
+
+    if(oneReady)
+    { 
+        const [back1InvClicked] = raycaster.intersectObject(back1Inv);
+        if (back1InvClicked)
+        {
+            console.log("back1Inv clicked")
+            sceneReady = true
+            oneReady = false
+            currentIntersect = null
+
+            // Move Camera
+            gsap.to(controls.target, { duration: 2, delay: 0, x: 0 })
+            gsap.to(controls.target, { duration: 2, delay: 0, y: 0 })
+            gsap.to(controls.target, { duration: 2, delay: 0, z: 0 })
+            
+            gsap.to(camera.position, { duration: 2, delay: 0, x: 0 })
+            gsap.to(camera.position, { duration: 2, delay: 0, y: 20 })
+            gsap.to(camera.position, { duration: 2, delay: 0, z: 20 }) 
+
+            // Close back1
+            gsap.to(back1.scale, { duration: 0.5, delay: 0, x: 0 })
+            gsap.to(back1.scale, { duration: 0.5, delay: 0, y: 0 })
+            gsap.to(back1.scale, { duration: 0.5, delay: 0, z: 0 })
+
+            gsap.to(back1Inv.scale, { duration: 0.5, delay: 0, x: 0 })
+            gsap.to(back1Inv.scale, { duration: 0.5, delay: 0, y: 0 })
+            gsap.to(back1Inv.scale, { duration: 0.5, delay: 0, z: 0 })
+
+            
+
+            
+            openMapSigns()
+
+            
+        }
+    }
+}
+renderer.domElement.addEventListener('click', onClick);
+
+
+
+
+// /////////////////////////////////CONFIGORBITCONTROLS///////////////////////////
+
+const controls = new OrbitControls(camera, canvas)
+controls.enableDamping = true
+    
+// /////////////////////////////////TICK FUNCTION USING CLOCK/////////////////////
+const clock = new THREE.Clock()
+
+const tick = () =>
+{
+    
+    const elapsedTime = clock.getElapsedTime()
+
+    sign1.lookAt(camera.position)
+    info1.lookAt(camera.position)
+
+
+    if(sceneReady)
+    {   
+
+        raycaster.setFromCamera(mouse, camera)
+
+        const objectsToTest = [inv1]
+        const intersects = raycaster.intersectObjects(objectsToTest)
+        if(intersects.length)
+        {
+            if(currentIntersect === null)
+            {
+                console.log("mouse enter")
+                var col = new THREE.Color('#0000ff')
+                gsap.to(sign1.material.color, {duration: 0.5, delay: 0,  r: col.r, g: col.g, b: col.b })
+    
+                gsap.to(sign1.position,{ duration: 0.5, delay: 0, y: 8 })
+    
+                gsap.to(sign1.scale,{ duration: 0.5, delay: 0, x: 1.2 })
+                gsap.to(sign1.scale,{ duration: 0.5, delay: 0, y: 1.2 })
+                gsap.to(sign1.scale,{ duration: 0.5, delay: 0, z: 1.2 })
+                gsap.to(info1.scale,{ duration: 0.5, delay: 0, x: 1.2 })
+                gsap.to(info1.scale,{ duration: 0.5, delay: 0, y: 1.2 })
+                gsap.to(info1.scale,{ duration: 0.5, delay: 0, z: 1.2 })
+            }
+            currentIntersect = intersects[0]
+        }
+        else
+        {
+            if(currentIntersect)
+            {
+                console.log("mouse leave")
+                var col = new THREE.Color('#ff0000')
+                gsap.to(sign1.material.color, {duration: 0.5, delay: 0,  r: col.r, g: col.g, b: col.b })
+    
+                gsap.to(sign1.position,{ duration: 0.5, delay: 0, y: 5 })
+    
+                gsap.to(sign1.scale,{ duration: 0.5, delay: 0, x: 1 })
+                gsap.to(sign1.scale,{ duration: 0.5, delay: 0, y: 1 })
+                gsap.to(sign1.scale,{ duration: 0.5, delay: 0, z: 1 })
+                gsap.to(info1.scale,{ duration: 0.5, delay: 0, x: 0 })
+                gsap.to(info1.scale,{ duration: 0.5, delay: 0, y: 0 })
+                gsap.to(info1.scale,{ duration: 0.5, delay: 0, z: 0 })
+            }
+            currentIntersect = null
+        }
+    }
+
+
+    if(oneReady)
+    {   
+
+        raycaster.setFromCamera(mouse, camera)
+
+        const objectsToTest = [back1Inv]
+        const intersects = raycaster.intersectObjects(objectsToTest)
+        if(intersects.length)
+        {
+            if(currentIntersect === null)
+            {
+                console.log("back1Inv enter")
+                var col = new THREE.Color('#ffff00')
+                gsap.to(back1.material.color, {duration: 0.5, delay: 0,  r: col.r, g: col.g, b: col.b })
+    
+                // gsap.to(back1.position,{ duration: 0.5, delay: 0, y: 8 })
+    
+                gsap.to(back1.scale,{ duration: 0.5, delay: 0, x: 1.2 })
+                gsap.to(back1.scale,{ duration: 0.5, delay: 0, y: 1.2 })
+                gsap.to(back1.scale,{ duration: 0.5, delay: 0, z: 1.2 })
+
+            }
+            currentIntersect = intersects[0]
+        }
+        else
+        {
+            if(currentIntersect)
+            {
+                console.log("back1Inv leave")
+                var col = new THREE.Color('#ff00ff')
+                gsap.to(back1.material.color, {duration: 0.5, delay: 0,  r: col.r, g: col.g, b: col.b })
+    
+                // gsap.to(sign1.position,{ duration: 0.5, delay: 0, y: 5 })
+    
+                gsap.to(back1.scale,{ duration: 0.5, delay: 0, x: 1 })
+                gsap.to(back1.scale,{ duration: 0.5, delay: 0, y: 1 })
+                gsap.to(back1.scale,{ duration: 0.5, delay: 0, z: 1 })
+
+            }
+            currentIntersect = null
+        }
+    }
+  
+
+  
+
+    controls.update()
+
+
+    
+    renderer.render(scene, camera)
+    window.requestAnimationFrame(tick)
+}
+
+tick()
